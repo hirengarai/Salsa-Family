@@ -19,11 +19,11 @@
 listBLOCKs =[] # list form
 
 
-list = [2, 3, 4, 5, 6, 39, 47, 48, 66, 67, 68, 69, 70, 71, 72, 73, 74, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 90, 91, 92, 95, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 115, 123, 124, 125, 126, 127, 155, 156, 157, 158, 159, 168, 191, 192, 193, 194, 199, 200, 201, 207, 208, 211, 212, 213, 219, 220, 221, 222, 223, 224, 225, 226, 227, 244, 245, 246, 255] # PNBs
+list = [3, 4, 5, 6, 47, 48, 49, 67, 68, 69, 70, 71, 72, 73, 74, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 91, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 115, 124, 125, 126, 127, 156, 157, 158, 159, 169, 191, 192, 193, 194, 199, 200, 208, 212, 220, 221, 222, 223, 224, 225, 226, 227, 245, 246, 247] # PNBs
 
 # print(f"The initial length of the list: {len(list)}")
 
-block_len = 5 # how many consecutive elements to find
+block_len = 4 # how many consecutive elements to find
 
 if block_len > len(list):
     print("Block length is too high")
@@ -57,8 +57,7 @@ for i in list:
         
 # print("The rest of the ", len(rest)," elements are: ")
 # print(rest)  
-print(*listBLOCKs, sep=" ", file = open('europnbblock.txt','w'))  
-
+print(*listBLOCKs, sep=" ,", file = open('%dsyncopnbblock.txt' %block_len,'w')) 
 
 with open('europnbblock.txt', 'a') as file:
     for i in rest:

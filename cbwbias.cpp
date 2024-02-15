@@ -32,7 +32,7 @@ u16 *PNB, **BLOCK;
 size_t PNBcount, block_size, rest_size;
 
 // Aumasson et al.
-// u16 IDword[] = {13}, IDbit[] = {13}, ODword[] = {11}, ODbit[] = {0}, fwdround{3}, totalround{6}; // Aumasson et al.
+u16 IDword[] = {13}, IDbit[] = {13}, ODword[] = {11}, ODbit[] = {0}, fwdround{3}, IDsize{1}, ODsize{1}; // Aumasson et al.
 // Aumasson et al.
 
 // new 5 round dist. of 23
@@ -40,7 +40,7 @@ size_t PNBcount, block_size, rest_size;
 // new 5 round dist. of 23
 
 // // 4 round eurocrypt
-u16 IDword[] = {13}, IDbit[] = {6}, ODword[] = {2, 7, 8}, ODbit[] = {0, 7, 0}, fwdround{4}, IDsize{1}, ODsize{3};
+// u16 IDword[] = {13}, IDbit[] = {6}, ODword[] = {2, 7, 8}, ODbit[] = {0, 7, 0}, fwdround{4}, IDsize{1}, ODsize{3};
 // // eurocrypt
 
 int main()
@@ -54,7 +54,7 @@ int main()
   // --------------------- input the PNB file with PNB size as the last element ----------------------------
   if (!(strcasecmp(mode, "random")) || !(strcasecmp(mode, "0value")))
   {
-    PNB = OpenFile("europnb.txt", &PNBcount);
+    PNB = OpenFile("aumasson.txt", &PNBcount);
     cout << "|            # of bits that are not significant (PNB): " << PNBcount
          << "                       "<<setw(7)<<"|\n";
   }

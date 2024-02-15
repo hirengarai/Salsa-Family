@@ -4,7 +4,7 @@
  * Filename: syncobwbias.cpp
  *
  * created: 20/12/23
- * updated: 20/12/23
+ * updated: 29/12/23
  *
  * by Hiren
  * Research Scholar
@@ -70,7 +70,7 @@ int main()
 
     FORWARD fwd;
     BACKWARD bwd;
-    INIT_IV init_iv;
+    INITIALISE_IV init_iv;
     INIT_KEY init_key;
     INSERT_KEY insert_key;
     PUT_VALUE pv;
@@ -118,7 +118,6 @@ int main()
 
         for (int i{totalround}; i > fwdround; i--)
             bwd.RoundFunction(x0, i);
-
         // ---------------------------BW ROUND ENDS----------------------------------------------------------------------
         bwBit = (x0[2] ^ (x0[7] >> 7) ^ x0[8]) & 1; // Eurocrypt (4 rounds fw)
 

@@ -31,7 +31,7 @@ int main()
     double diffcount{0}, count[7]{0};
     // forward and backward class defintion
     FORWARD fwd;
-    INIT_IV init_iv;
+    INITIALISE_IV init_iv;
     INIT_KEY init_key;
     INSERT_KEY insert_key;
 

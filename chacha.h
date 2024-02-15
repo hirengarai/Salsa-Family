@@ -9,7 +9,7 @@
  * by Hiren
  * Research Scholar
  * BITS Pilani, Hyderabad Campus
- * 
+ *
  * Synopsis:
  *  This file contains functions that implement the ChaCha round functon
  */
@@ -54,7 +54,7 @@
 
 // #1st half
 #define FWQR_16_12(a, b, c, d) \
-  FWQR16(a, b, c, d);          \
+  FWARX16(a, b, c, d);         \
   FWQR12(a, b, c, d);
 
 #define XFWQR_16_12(a, b, c, d) \
@@ -178,18 +178,18 @@ public:
 
   void Quarter_1_EvenRF(u32 *x)
   {
-    FWQR16((x[0]), (x[5]), (x[10]), (x[15])); // diagonal 1
-    FWQR16((x[1]), (x[6]), (x[11]), (x[12])); // diagonal 2
-    FWQR16((x[2]), (x[7]), (x[8]), (x[13]));  // diagonal 3
-    FWQR16((x[3]), (x[4]), (x[9]), (x[14]));  // diagonal 4
+    FWARX16((x[0]), (x[5]), (x[10]), (x[15])); // diagonal 1
+    FWARX16((x[1]), (x[6]), (x[11]), (x[12])); // diagonal 2
+    FWARX16((x[2]), (x[7]), (x[8]), (x[13]));  // diagonal 3
+    FWARX16((x[3]), (x[4]), (x[9]), (x[14]));  // diagonal 4
   }
 
   void Quarter_1_OddRF(u32 *x)
   {
-    FWQR16((x[0]), (x[4]), (x[8]), (x[12]));  // column 1
-    FWQR16((x[1]), (x[5]), (x[9]), (x[13]));  // column 2
-    FWQR16((x[2]), (x[6]), (x[10]), (x[14])); // column 3
-    FWQR16((x[3]), (x[7]), (x[11]), (x[15])); // column 4
+    FWARX16((x[0]), (x[4]), (x[8]), (x[12]));  // column 1
+    FWARX16((x[1]), (x[5]), (x[9]), (x[13]));  // column 2
+    FWARX16((x[2]), (x[6]), (x[10]), (x[14])); // column 3
+    FWARX16((x[3]), (x[7]), (x[11]), (x[15])); // column 4
   }
 
   void Quarter_2_EvenRF(u32 *x)

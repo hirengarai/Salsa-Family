@@ -24,7 +24,7 @@
 
 #define WORD_SIZE 32
 #define MOD 4294967296 // pow(2, WORD_SIZE)
-#define GET_BIT(a, p) (((a) >> (p)) & 0x1)
+#define GET_BIT(a, p) (((a) >> (p)) & 0x1) // p-th bit of word
 
 typedef uint16_t u16;           // positive integer of 16 bits
 typedef uint32_t u32;           // positive integer of 32 bits

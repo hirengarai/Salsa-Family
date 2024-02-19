@@ -533,7 +533,7 @@ void ChaCha(int l)
     }
     auto e2 = std::chrono::high_resolution_clock::now();
     auto d2 = std::chrono::duration<double, std::micro>(e2 - s2).count();
-    std::cout << "chacha function " << d2 << " ~ " << d2 / 1000000.0 << "\n";
+    // std::cout << "chacha function " << d2 << " ~ " << d2 / 1000000.0 << "\n";
 }
 int main()
 {

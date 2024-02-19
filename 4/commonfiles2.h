@@ -44,6 +44,9 @@ constexpr size_t CHACHA_IV_END = 15;
 constexpr size_t CHACHA_KEY_START = 4;
 constexpr size_t CHACHA_KEY_END = 11;
 
+constexpr size_t FORRO_KEY_START = 0;
+constexpr size_t FORRO_KEY_END = 11;
+
 constexpr size_t BLOCK_LEN = 5; // if PNBs are in block form, then the block length
 
 #define GetBit(word, bit) ((bit >= 0 && bit < sizeof(word) * 8) ? ((word >> bit) & 0x1) : false)
@@ -181,13 +184,12 @@ namespace ChaCha
     u16 diagonal[4][4] = {{0, 5, 10, 15}, {1, 6, 11, 12}, {2, 7, 8, 13}, {3, 4, 9, 14}};
     void inisialize(u32 *x, bool randflag = true, u32 value = 1)
     {
+        x[0] = 0x61707865;
+        x[1] = 0x3320646e;
+        x[2] = 0x79622d32;
+        x[3] = 0x6b206574;
         if (randflag)
         {
-            x[0] = 0x61707865;
-            x[1] = 0x3320646e;
-            x[2] = 0x79622d32;
-            x[3] = 0x6b206574;
-
             for (size_t index{CHACHA_IV_START}; index <= CHACHA_IV_END; ++index)
                 x[index] = GenerateRandom32Bits(); // IV
         }
@@ -278,6 +280,42 @@ namespace ChaCha
                 }
             }
         }
+    }
+}
+
+namespace Forro
+{
+    void inisialize(u32 *x, bool randflag = true, u32 value = 1)
+    {
+        x[6] = 0x746C6F76;
+        x[7] = 0x61616461;
+        x[14] = 0x72626173;
+        x[15] = 0x61636E61;
+        if (randflag)
+        {
+            // for (size_t index{CHACHA_IV_START}; index <= CHACHA_IV_END; ++index)
+            //     x[index] = GenerateRandom32Bits(); // IV
+            x[4] = GenerateRandom32Bits();
+            x[5] = GenerateRandom32Bits();
+            x[12] = GenerateRandom32Bits();
+            x[13] = GenerateRandom32Bits();
+        }
+        else
+        {
+            // for (size_t index{0}; index < WORD_COUNT; ++index)
+            //     x[index] = value;
+            x[4] = value;
+            x[5] = value;
+            x[12] = value;
+            x[13] = value;
+        }
+    }
+    void insertkey(u32 *x, u32 *k)
+    {
+        for (size_t index{0}; index <= 3; ++index)
+            x[index] = k[index];
+        for (size_t index{8}; index <= 11; ++index)
+            x[index] = k[index - 4];
     }
 }
 
@@ -579,7 +617,7 @@ namespace Operation
             output << " " << std::setw(6) << "Output Differential: ";
             Operation::arrayprint.doubleprint(params.OD, params.ODsize, 2, "⊕");
         }
-        if(params.precision_digit)
+        if (params.precision_digit)
             output << " The degree of precision is upto " << params.precision_digit - 1 << " digits after decimal\n";
         // output << "+------------------------------------------------------------------------------------+\n";
     }

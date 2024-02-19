@@ -128,49 +128,50 @@ int main(int argc, char *argv[])
         // {
         // if (!(find(begin(PNB), end(PNB), j) != end(PNB))) // this means the element is not in the PNB set
         // {
-            if (PNBindex < 35)
-                sampledetails.samplesperLoop = 75000;
+        if (PNBindex < 35)
+            sampledetails.samplesperLoop = 75000;
 
-            else if (PNBindex >= 35)
-                sampledetails.samplesperLoop = pow(2, 20);
+        else if (PNBindex >= 35)
+            sampledetails.samplesperLoop = pow(2, 20);
 
-            else if (PNBindex >= 45)
-                sampledetails.samplesperLoop = pow(2, 23);
+        else if (PNBindex >= 45)
+            sampledetails.samplesperLoop = pow(2, 23);
 
-            else if (PNBindex >= 60)
-                sampledetails.samplesperLoop = pow(2, 24);
+        else if (PNBindex >= 60)
+            sampledetails.samplesperLoop = pow(2, 24);
 
-            else if (PNBindex >= 68)
-                sampledetails.samplesperLoop = pow(2, 25);
+        else if (PNBindex >= 68)
+            sampledetails.samplesperLoop = pow(2, 25);
 
-            sampledetails.samplesperThread = sampledetails.samplesperLoop / max_num_threads;
+        sampledetails.samplesperThread = sampledetails.samplesperLoop / max_num_threads;
 
-            for (int key{0}; key < 256; ++key)
-            {SUM = 0;
-                bool flag = false;
-                for (int temp{0}; temp < PNBindex; ++temp)
-                {
-                    if (key == PNB[temp])
-                        flag = true;
-                }
-                if (!flag)
-                {
-                    for (int i{0}; i < max_num_threads; ++i)
-                    {
-                        promise<double> prms;
-
-                        futureCounts[i] = prms.get_future();
-                        threadPool[i] = thread(&findPNB, key, move(prms));
-                        // cout << "Thread id at " << i << " : " << threadPool.at(i).get_id() <<"\n";
-                    }
-                    for (int i{0}; i < max_num_threads; ++i)
-                        threadPool[i].join();
-
-                    for (int i{0}; i < max_num_threads; ++i)
-                        SUM += futureCounts[i].get();
-                    array_of_nm[key] = 2 * (SUM / sampledetails.samplesperLoop) - 1.0;
-                }
+        for (int key{0}; key < 256; ++key)
+        {
+            SUM = 0;
+            bool flag = false;
+            for (int temp{0}; temp < PNBindex; ++temp)
+            {
+                if (key == PNB[temp])
+                    flag = true;
             }
+            if (!flag)
+            {
+                for (int i{0}; i < max_num_threads; ++i)
+                {
+                    promise<double> prms;
+
+                    futureCounts[i] = prms.get_future();
+                    threadPool[i] = thread(&findPNB, key, move(prms));
+                    // cout << "Thread id at " << i << " : " << threadPool.at(i).get_id() <<"\n";
+                }
+                for (int i{0}; i < max_num_threads; ++i)
+                    threadPool[i].join();
+
+                for (int i{0}; i < max_num_threads; ++i)
+                    SUM += futureCounts[i].get();
+                array_of_nm[key] = 2 * (SUM / sampledetails.samplesperLoop) - 1.0;
+            }
+        }
         // }
         // cout << j << " - " << array_of_nm[j] << "\n";
         // }

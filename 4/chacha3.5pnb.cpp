@@ -80,6 +80,7 @@ void initializeR(ul *x)
     x[3] = 0x6b206574;
 }
 
+// x  is copied into x1
 void copystate(ul *x1, ul *x)
 {
     int i;
@@ -310,7 +311,7 @@ void inrounds(ul *x)
 
 void ChaCha(int l)
 {
-
+    auto s2 = std::chrono::high_resolution_clock::now();
     ul x[16], x0[16], x1[16], x01[16], y0, z[16], z1[16], z2[16], diff, pattern, pt, i1, i2, i3, z11[16], z22[16], y1, y11;
     int i, j, k, j1, A[] = {4, 5, 6, 7, 8, 9, 10, 11}, m, n, o, p;
     ull loop = 0;
@@ -321,6 +322,7 @@ void ChaCha(int l)
     {
         // while (1)
         // {
+        // auto s1 = std::chrono::high_resolution_clock::now();
         initializeR(x);
 
         copystate(x1, x);
@@ -410,29 +412,36 @@ void ChaCha(int l)
 
         // for (i1 = 0; i1 < 256; i1++)
         // {
-            for (i = 0; i < l; ++i){
-                // std::cout << i1<<"~"<< C[i1] << "\n";
-                if (C[i] != -1)
+        for (i = 0; i < l; ++i)
+        {
+            // std::cout << i1<<"~"<< C[i1] << "\n";
+            if (C[i] != -1)
+            {
+                if (GenerateRandomBoolean())
                 {
-                    if (GenerateRandomBoolean())
-                    {
-                        pt = 0x1;
-                        i2 = A[C[i] / 32];
-                        i3 = C[i] % 32;
-                        // printf("HERE %d  %d  %d\n", i2,i3,i1);
-                        pt = rotateleft(pt, i3);
-                        // pt=0;
+                    pt = 0x1;
+                    i2 = A[C[i] / 32];
+                    i3 = C[i] % 32;
+                    // printf("HERE %d  %d  %d\n", i2,i3,i1);
+                    pt = rotateleft(pt, i3);
+                    // pt=0;
 
-                        x0[i2] = x0[i2] ^ pt;
+                    x0[i2] = x0[i2] ^ pt;
 
-                        x01[i2] = x0[i2];
-                    }
+                    x01[i2] = x0[i2];
+                }
 
-                } //*/
+            } //*/
         }
+        // std::cout << "time: ";
+        // auto e1 = std::chrono::high_resolution_clock::now();
+        // auto d1 = std::chrono::duration<double, std::micro>(e1 - s1).count();
+        // std::cout << d1 << " ~ " << d1 / 1000000.0 << "\n";
 
+        // std::cout << "\nltime:\n";
         for (int key = 0; key < 256; ++key)
         {
+            // auto s2 = std::chrono::high_resolution_clock::now();
 
             bool flag = false;
             for (i = 0; i < l; i++)
@@ -441,6 +450,7 @@ void ChaCha(int l)
             if (flag)
                 continue;
             // if (!(std::find(std::begin(C), std::end(C), key) != std::end(C)))
+            else
             {
                 copystate(z1, z11);
                 copystate(z2, z22);
@@ -515,9 +525,15 @@ void ChaCha(int l)
                     // }
                 }
             }
+            // auto e2 = std::chrono::high_resolution_clock::now();
+            // auto d2 = std::chrono::duration<double, std::micro>(e2 - s2).count();
+            // std::cout << key<<" = "<< d2 << " ~ " << d2 / 1000000.0 << "\n";
         }
         loop++;
     }
+    auto e2 = std::chrono::high_resolution_clock::now();
+    auto d2 = std::chrono::duration<double, std::micro>(e2 - s2).count();
+    std::cout << "chacha function " << d2 << " ~ " << d2 / 1000000.0 << "\n";
 }
 int main()
 {
@@ -528,10 +544,10 @@ int main()
     int A[] = {4, 5, 6, 7, 8, 9, 10, 11};
     double rr;
 
-    for (l = 0; l < 35; l++)
+    for (l = 0; l < 80; l++)
     {
         for (i = 0; i < 256; i++)
-        val[i] = 0;
+            val[i] = 0;
         auto start = std::chrono::high_resolution_clock::now();
         if (l < 35)
             LOOP = 75000; // pow(2,17)
@@ -544,7 +560,13 @@ int main()
         else if (l >= 68)
             LOOP = 30000000; // pow(2,25)
 
+        auto s = std::chrono::high_resolution_clock::now();
         ChaCha(l);
+        auto e = std::chrono::high_resolution_clock::now();
+        auto d = std::chrono::duration<double, std::micro>(e - s).count();
+        // auto d1 = std::chrono::duration<double, std::micro>(e1 - s).count();
+        // auto d2 = std::chrono::duration<double, std::micro>(e2 - e1).count();
+        // std::cout <<"main function "<< d << " ~ " << d / 1000000.0 << "\n";
         rr = 0;
         // for(i=0;i<256;i++)
         //   if((double)val1[i]/val[i]>0.51)
@@ -553,13 +575,17 @@ int main()
         //}
 
         for (i = 0; i < 256; i++)
+        {
+            // std::cout << i << " - " << val[i] << " || ";
             if (2 * (double)val[i] / LOOP - 1.0 > rr)
             {
                 rr = 2 * (double)val[i] / LOOP - 1.0;
                 i0 = i;
             }
+            // std::cout << "\n";
+        }
         printf("\n------------------------------\n");
-        printf(" %d %d %0.5f\n", A[i0 / 32], i0 % 32, 2 * (double)val[i0] / LOOP - 1.0);
+        printf("%0.5f\n", 2 * (double)val[i0] / LOOP - 1.0);
 
         printf("\n------------------------------\n");
 
@@ -567,7 +593,7 @@ int main()
 
         for (i = 0; i <= l; i++)
             printf("%d, ", C[i]);
-        printf("   %d", l + 1);
+        printf("%d", l + 1);
         printf("\n------------------------------\n");
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration<double, std::micro>(end - start).count();

@@ -82,7 +82,6 @@ void qr(ul *x0, ul *x1, ul *x2, ul *x3, ul *x4)
 
 void qrxor(ul *a, ul *b, ul *c, ul *d, ul *e)
 {
-
     ul a1, b1, c1, d1, a2, b2, c2, d2, e2;
     d1 = *d ^ *e;
     c1 = *c ^ d1;
@@ -219,7 +218,7 @@ int main()
     ull loop = 0;
     LOOP = 100000;
 
-    double threshold = 0.22;
+    double threshold = 0.2;
 
     srand48(time(NULL));
     for (i = 0; i < 256; i++)
@@ -235,55 +234,58 @@ int main()
 
         initializeR(x);
 
-        copystate(x1, x);
+        // copystate(x1, x);
         copystate(x_ori, x);
 
-        pt = 0x00000001 << 11;
+        // pt = 0x00000001 << 11;
 
-        x1[5] = x[5] ^ pt;
+        // x1[5] = x[5] ^ pt;
 
-        copystate(x1_ori, x1);
+        // copystate(x1_ori, x1);
 
         roundxorodd(x);
-        roundxorodd(x1);
+        // roundxorodd(x1);
         roundeven(x);
-        roundeven(x1);
+        // roundeven(x1);
 
         // for (i = 1; i < 2; i++){if ((i%2)==0) {roundodd(x); roundodd(x1);} else {roundeven(x); roundeven(x1);}}
 
         // fhalfroundodd(x); fhalfroundodd(x1);
         // shalfroundodd(x); shalfroundodd(x1);
 
-        diff1 = (x[10] << 0) ^ (x1[10] << 0);
-        temp = x[10];
+        // diff1 = (x[10] << 0) ^ (x1[10] << 0);
+        diff1 = (x[10] >> 7);
+        // temp = x[10];
 
         roundodd(x);
-        roundodd(x1);
+        // roundodd(x1);
         roundeven(x);
-        roundeven(x1);
+        // roundeven(x1);
         roundodd(x);
-        roundodd(x1);
+        // roundodd(x1);
+        roundeven(x);
+        // roundeven(x1);
 
-        fhalfroundeven(x);
-        fhalfroundeven(x1);
+        // fhalfroundeven(x);
+        // fhalfroundeven(x1);
 
         for (i = 0; i < 16; i++)
         {
 
             z[i] = (x[i] + x_ori[i]);
-            z1[i] = (x1[i] + x1_ori[i]);
+            // z1[i] = (x1[i] + x1_ori[i]);
         }
 
         copystate(z_ori, z);
-        copystate(z1_ori, z1);
+        // copystate(z1_ori, z1);
 
         for (i1 = 0; i1 < 256; i1++)
         {
 
             copystate(z, z_ori);
-            copystate(z1, z1_ori);
+            // copystate(z1, z1_ori);
             copystate(x0, x_ori);
-            copystate(x01, x1_ori);
+            // copystate(x01, x1_ori);
 
             pt = 0x00000001;
 
@@ -297,7 +299,7 @@ int main()
             // if(drand48()<0){
 
             x0[i2] = x0[i2] ^ pt;
-            x01[i2] = x01[i2] ^ pt;
+            // x01[i2] = x01[i2] ^ pt;
 
             // printf("x0[%d]=%u, x01[%d]=%u\n",i2,x01[i2],i2,x01[i2]);
             // printf("cell no.=%d\n",i2);
@@ -308,18 +310,19 @@ int main()
             {
 
                 z[i] = z[i] + (MOD - (x0[i]));
-                z1[i] = z1[i] + (MOD - (x01[i]));
+                // z1[i] = z1[i] + (MOD - (x01[i]));
             }
 
-            reshalfroundeven(z);
-            reshalfroundeven(z1);
-
-            inroundo(z);
-            inroundo(z1);
+            // reshalfroundeven(z);
+            // reshalfroundeven(z1);
             inrounde(z);
-            inrounde(z1);
+            // inrounde(z1);
             inroundo(z);
-            inroundo(z1);
+            // inroundo(z1);
+            inrounde(z);
+            // inrounde(z1);
+            inroundo(z);
+            // inroundo(z1);
 
             //   reshalfroundodd(z); reshalfroundodd(z1);
 
@@ -330,8 +333,9 @@ int main()
 
             // inroundo(z); inroundo(z1);
 
-            diff2 = (z[10] >> 0) ^ (z1[10] >> 0);
-            temp2 = z[10];
+            // diff2 = (z[10] >> 0) ^ (z1[10] >> 0);
+            diff2 = (z[15] >> 7);
+            // temp2 = z[10];
 
             // finaldiff  = (diff1^diff2);
 
@@ -352,12 +356,12 @@ int main()
 
     int PNBcount = 0;
     for (i1 = 0; i1 < 256; i1++)
-        if ((2 * (((double)val1[i1] / val[i1]) - 0.5)) > threshold)
+        if (fabs(2 * (((double)val1[i1] / LOOP) - 0.5)) > threshold)
 
         {
             PNBcount++;
 
-            printf("bit=%d,bias=%0.10f\n", i1, 2 * (((double)val1[i1] / val[i1]) - 0.5));
+            printf("bit=%d,bias=%0.10f\n", i1, 2 * (((double)val1[i1] / LOOP) - 0.5));
         }
 
     printf("count=%d\n", PNBcount);

@@ -308,21 +308,22 @@ void inrounds(ul *x)
     inqr(&(x[0]), &(x[4]), &(x[8]), &(x[12]));
 }
 
-
+time_t ftime[256]{0};
 void ChaCha(int l, int key)
 {
+    auto s2 = std::chrono::high_resolution_clock::now();
 
     ul x[16], x0[16], x1[16], x01[16], y0, z[16], z1[16], z2[16], diff, pattern, pt, i1, i2, i3, z11[16], z22[16], y1, y11;
     int i, j, k, j1, A[] = {4, 5, 6, 7, 8, 9, 10, 11}, m, n, o, p;
     ull loop = 0;
 
-    
     ull MOD = 4294967296;
     loop = 0;
     while (loop < LOOP)
     {
         // while (1)
         // {
+        // auto s1 = std::chrono::high_resolution_clock::now();
         initializeR(x);
 
         copystate(x1, x);
@@ -412,132 +413,143 @@ void ChaCha(int l, int key)
 
         // for (i1 = 0; i1 < 256; i1++)
         // {
-            for (i = 0; i < l; ++i){
-                // std::cout << i1<<"~"<< C[i1] << "\n";
-                if (C[i] != -1)
-                {
-                    if (GenerateRandomBoolean())
-                    {
-                        pt = 0x1;
-                        i2 = A[C[i] / 32];
-                        i3 = C[i] % 32;
-                        // printf("HERE %d  %d  %d\n", i2,i3,i1);
-                        pt = rotateleft(pt, i3);
-                        // pt=0;
-
-                        x0[i2] = x0[i2] ^ pt;
-
-                        x01[i2] = x0[i2];
-                    }
-
-                } //*/
-        }
-
-        // for (i1 = 0; i1 < 256; i1++)
-        // {
-
-            // bool flag = false;
-            // for (i = 0; i < l; i++)
-            //     if (key == C[i])
-            //         flag = true;
-            // if (flag)
-            //     continue;
-            // if (!(std::find(std::begin(C), std::end(C), i1) != std::end(C)))
-            // {
-                copystate(z1, z11);
-                copystate(z2, z22);
-
-                pt = 0x1;
-
-                // i2=POS[i];
-                // i3=BIT[i];
-                i2 = A[key / 32];
-                i3 = key % 32;
-                // printf("%d  %d  %d\n", i2,i3,i1);
-                pt = rotateleft(pt, i3);
-                // pt=0;
-                y0 = 0;
+        for (i = 0; i < l; ++i)
+        {
+            // std::cout << i1<<"~"<< C[i1] << "\n";
+            if (C[i] != -1)
+            {
                 if (GenerateRandomBoolean())
                 {
-                    x0[i2] = x0[i2] ^ pt;
-                    // }
+                    pt = 0x1;
+                    i2 = A[C[i] / 32];
+                    i3 = C[i] % 32;
+                    // printf("HERE %d  %d  %d\n", i2,i3,i1);
+                    pt = rotateleft(pt, i3);
+                    // pt=0;
 
-                    x01[i2] = x0[i2];
-                    y0 = 1;
-                }
-                //}
-
-                for (i = 0; i < 16; i++)
-                {
-                    z1[i] = z1[i]  - (x0[i]);
-                    z2[i] = z2[i]  - (x01[i]);
-                }
-
-                if (y0 == 1)
-                {
                     x0[i2] = x0[i2] ^ pt;
 
                     x01[i2] = x0[i2];
                 }
 
-                for (i = 7; i > 4; i--)
-                {
-                    if ((i % 2) == 1)
-                    {
-                        inroundo(z1);
-                        inroundo(z2);
-                    }
-                    else
-                    {
-                        inrounde(z1);
-                        inrounde(z2);
-                    }
-                }
+            } //*/
+        }
+        // std::cout << "time: ";
+        // auto e1 = std::chrono::high_resolution_clock::now();
+        // auto d1 = std::chrono::duration<double, std::micro>(e1 - s1).count();
+        // std::cout << d1 << " ~ " << d1 / 1000000.0 << "\n";
 
-                // z[1]= z[1] ^ z1[1] ^ z2[1];
+        std::cout << "\nltime:\n";
+        // {
+        // auto s2 = std::chrono::high_resolution_clock::now();
+        copystate(z1, z11);
+        copystate(z2, z22);
 
-                y1 = z1[2] ^ z1[8] ^ (z1[7] >> 7);
-                y11 = z2[2] ^ z2[8] ^ (z2[7] >> 7);
+        pt = 0x1;
 
-                z[11] = (y1 ^ y11 ^ diff);
-
-                // z[2]= rotateright(z[2],0);
-
-                pattern = 0x1;
-                if ((z[11] & pattern) == 0)
-                {
-                    val[key]++;
-                    // pattern = 0x80000000;
-                    // z[11] = (y1 ^ y11 ^ diff);
-                    // z[11] = rotateright(z[11], 1);
-                    // if ((z[11] & pattern) == 0)
-                    // {
-
-                    //     val1[i1] = val1[i1] + 1;
-                    // }
-                }
+        // i2=POS[i];
+        // i3=BIT[i];
+        i2 = A[key / 32];
+        i3 = key % 32;
+        // printf("%d  %d  %d\n", i2,i3,i1);
+        pt = rotateleft(pt, i3);
+        // pt=0;
+        y0 = 0;
+        if (GenerateRandomBoolean())
+        {
+            x0[i2] = x0[i2] ^ pt;
             // }
+
+            x01[i2] = x0[i2];
+            y0 = 1;
+        }
+        //}
+
+        for (i = 0; i < 16; i++)
+        {
+            z1[i] = z1[i] - (x0[i]);
+            z2[i] = z2[i] - (x01[i]);
+        }
+
+        if (y0 == 1)
+        {
+            x0[i2] = x0[i2] ^ pt;
+
+            x01[i2] = x0[i2];
+        }
+
+        for (i = 7; i > 4; i--)
+        {
+            if ((i % 2) == 1)
+            {
+                inroundo(z1);
+                inroundo(z2);
+            }
+            else
+            {
+                inrounde(z1);
+                inrounde(z2);
+            }
+        }
+
+        // z[1]= z[1] ^ z1[1] ^ z2[1];
+
+        y1 = z1[2] ^ z1[8] ^ (z1[7] >> 7);
+        y11 = z2[2] ^ z2[8] ^ (z2[7] >> 7);
+
+        z[11] = (y1 ^ y11 ^ diff);
+
+        // z[2]= rotateright(z[2],0);
+
+        pattern = 0x1;
+        if ((z[11] & pattern) == 0)
+        {
+            val[key]++;
+            // pattern = 0x80000000;
+            // z[11] = (y1 ^ y11 ^ diff);
+            // z[11] = rotateright(z[11], 1);
+            // if ((z[11] & pattern) == 0)
+            // {
+
+            //     val1[i1] = val1[i1] + 1;
+            // }
+        }
         // }
+        // }
+        // }
+        // auto e2 = std::chrono::high_resolution_clock::now();
+        // auto d2 = std::chrono::duration<double, std::micro>(e2 - s2).count();
+        // // std::cout << typeid(d2).name() << "\n";
+        // // ftime[key] += d2;
+        // std::cout << "key from loop " << key << " = " << d2 << " ~ " << d2 / 1000000.0 << "\n";
         loop++;
     }
+    auto e2 = std::chrono::high_resolution_clock::now();
+    auto d2 = std::chrono::duration<double, std::micro>(e2 - s2).count();
+    // std::cout << typeid(d2).name() << "\n";
+    // ftime[key] += d2;
+    std::cout << "value from loop " << key << " = " << d2 << " ~ " << d2 / 1000000.0 << "\n";
 }
 int main()
 {
 
     // srand48(time(NULL));
 
-    std::fill(C, C + 80, -1);
+    // std::fill(C, C + 80, -1);
+
+    for (int i = 0; i < 80; i++)
+        C[i] = -1;
     int i, i0;
     int A[] = {4, 5, 6, 7, 8, 9, 10, 11};
     double rr;
 
-    for (l = 0; l < 35; l++)
+    for (l = 0; l < 1; l++)
     {
         for (int i = 0; i < 256; i++)
             val[i] = 0;
         auto start = std::chrono::high_resolution_clock::now();
         if (l < 35)
-            LOOP = 75000; // pow(2,17)
+            LOOP = 1; // pow(2,17)
         else if (l >= 35)
             LOOP = 600000; // pow(2,20)
         else if (l >= 45)
@@ -549,14 +561,29 @@ int main()
 
         for (int key{0}; key < 256; ++key)
         {
+            // auto s = std::chrono::high_resolution_clock::now();
+            // auto s = std::chrono::high_resolution_clock::now();
             bool flag = false;
             for (int temp{0}; temp < l; ++temp)
             {
                 if (key == C[temp])
                     flag = true;
             }
-            if(!flag)
+            // auto e1 = std::chrono::high_resolution_clock::now();
+            if (!flag)
+            {
+                auto s = std::chrono::high_resolution_clock::now();
                 ChaCha(l, key);
+                auto e = std::chrono::high_resolution_clock::now();
+                auto d = std::chrono::duration<double, std::micro>(e - s).count();
+                // auto d1 = std::chrono::duration<double, std::micro>(e1 - s).count();
+                // auto d2 = std::chrono::duration<double, std::micro>(e2 - e1).count();
+                std::cout << "key " << key << " = d " << d << " ~ " << d / 1000000.0 << "\n";
+            }
+            // auto e2 = std::chrono::high_resolution_clock::now();
+           
+            // std::cout << "key " << key << " = " << d1 << " ~ " << d1 / 1000000.0 << "  d2  ";
+            // std::cout << d2 << " ~ " << d2 / 1000000.0<<"\n";
         }
 
         rr = 0;
@@ -581,7 +608,7 @@ int main()
 
         for (i = 0; i <= l; i++)
             printf("%d, ", C[i]);
-        printf("   %d", l + 1);
+        printf("%d", l + 1);
         printf("\n------------------------------\n");
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration<double, std::micro>(end - start).count();

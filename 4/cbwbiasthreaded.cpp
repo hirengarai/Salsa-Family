@@ -59,12 +59,18 @@ int main()
     sampledetails.totalLoop = pow(2, 14);
     sampledetails.samplesperLoop = sampledetails.samplesperThread * max_num_threads;
 
-    PNBdetails.PNBfile = "europnb.txt";
-    PNBdetails.PNB = OpenFile("europnb.txt", &PNBdetails.PNBsize);
-    /* u16 PNB[] = {2, 3, 4, 5, 6, 39, 47, 48, 66, 67, 68, 69, 70, 71, 72, 73, 74, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 90, 91, 92, 95, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 115, 123, 124, 125, 126, 127, 155, 156, 157, 158, 159, 168, 191, 192, 193, 194, 199, 200, 201, 207, 208, 211, 212, 213, 219, 220, 221, 222, 223, 224, 225, 226, 227, 244, 245, 246, 255};
+    PNBdetails.PNBblockflag = true;
+    PNBdetails.PNBfile = "pnbblock.txt";
+    u16 **PNB;
+    PNB = OpenFile("pnbblock.txt", &PNBdetails.PNBinblocksize, &PNBdetails.restPNBsize);
+    PNBdetails.PNBinblock = PNB[0];
+    PNBdetails.restPNB = PNB[1];
+    
 
-      // PNBdetails.PNB = PNB;
-      // PNBdetails.PNBsize = sizeof(PNB) / sizeof(PNB[0]);*/
+    // u16 PNB[] = {2, 3, 4, 5, 6, 39, 47, 48, 66, 67, 68, 69, 70, 71, 72, 73, 74, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 90, 91, 92, 95, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 115, 123, 124, 125, 126, 127, 155, 156, 157, 158, 159, 168, 191, 192, 193, 194, 199, 200, 201, 207, 208, 211, 212, 213, 219, 220, 221, 222, 223, 224, 225, 226, 227, 244, 245, 246, 255};
+
+    // PNBdetails.PNB = PNB;
+    // PNBdetails.PNBsize = sizeof(PNB) / sizeof(PNB[0]);
 
     diffdetails.ID = ID;
     diffdetails.OD = OD;
@@ -77,7 +83,7 @@ int main()
     PrintPNBDetails(PNBdetails, cout);
     PrintSampleDetails(sampledetails, cout);
 
-    ofstream file("bias.txt" + PNBdetails.PNBfile);
+    ofstream file("blockbias" + PNBdetails.PNBfile);
     if (file.is_open())
     {
         file << "######## Execution started on: "
@@ -221,10 +227,40 @@ double bwbias(promise<double> &&matchcount)
         AddStates(dx0, dstrdx0);
 
         // randomise the PNBs
-        for (int i{0}; i < PNBdetails.PNBsize; ++i)
+        u32 WORD;
+        u16 BIT;
+        // for (int i{0}; i < PNBdetails.PNBsize; ++i)
+        // {
+        //     // int WORD = (PNBdetails.PNB[i] / WORD_SIZE) + 4;
+        //     // int BIT = PNBdetails.PNB[i] % WORD_SIZE;
+        //     calculateWORDandBIT(PNBdetails.PNB[i], WORD, BIT);
+
+        //     if (GenerateRandomBoolean())
+        //     {
+        //         ToggleBit(strdx0[WORD], BIT);
+        //         ToggleBit(dstrdx0[WORD], BIT);
+        //     }
+        // }
+
+        // u32 WORD;
+        // u16 BIT;
+        for (int i{0}; i < PNBdetails.PNBinblocksize; ++i)
         {
-            int WORD = (PNBdetails.PNB[i] / WORD_SIZE) + 4;
-            int BIT = PNBdetails.PNB[i] % WORD_SIZE;
+            calculateWORDandBIT(PNBdetails.PNBinblock[i], WORD, BIT);
+            if ((i % 5) == 4)
+            {
+                SetBit(strdx0[WORD], BIT);
+                SetBit(dstrdx0[WORD], BIT);
+            }
+            else
+            {
+                UnsetBit(strdx0[WORD], BIT);
+                UnsetBit(dstrdx0[WORD], BIT);
+            }
+        }
+        for (int i{0}; i < PNBdetails.restPNBsize; ++i)
+        {
+            calculateWORDandBIT(PNBdetails.restPNB[i], WORD, BIT);
 
             if (GenerateRandomBoolean())
             {

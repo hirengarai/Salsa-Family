@@ -27,7 +27,7 @@
     a += b, e ^= a, d = ADDUPDATE(d, e, 27), \
     c += d, b ^= c, a = ADDUPDATE(a, b, 8))
 
-#define XFWDQR(a, b, c, d, e,x) (              \
+#define XFWDQR(a, b, c, d, e) (            \
     d ^= e, c ^= d, b = XORUPDATE(b, c, 10), \
     a ^= b, e ^= a, d = XORUPDATE(d, e, 27), \
     c ^= d, b ^= c, a = XORUPDATE(a, b, 8))
@@ -37,11 +37,6 @@
     a = ROTATE_RIGHT(a, 8) - b, b ^= c, c -= d,  \
     d = ROTATE_RIGHT(d, 27) - e, e ^= a, a -= b, \
     b = ROTATE_RIGHT(b, 10) - c, c ^= d, d -= e)
-
-#define XBWDQR(a, b, c, d, e, x) (               \
-    a = ROTATE_RIGHT(a, 8) ^ b, b ^= c, c ^= d,  \
-    d = ROTATE_RIGHT(d, 27) ^ e, e ^= a, a ^= b, \
-    b = ROTATE_RIGHT(b, 10) ^ c, c ^= d, d ^= e)
 
 // -------------------------------------- RoundFunctionDefinition ------------------------------------------------
 class FORWARD
@@ -107,13 +102,17 @@ public:
     {
         if (round & 1)
         {
-            Half_1_ODDRF(x);
-            Half_2_ODDRF(x);
+            FWDQR((x[0]), (x[4]), (x[8]), (x[12]), (x[3]), false);
+            FWDQR((x[1]), (x[5]), (x[9]), (x[13]), (x[0]), false);
+            FWDQR((x[2]), (x[6]), (x[10]), (x[14]), (x[1]), false);
+            FWDQR((x[3]), (x[7]), (x[11]), (x[15]), (x[2]), false);
         }
         else
         {
-            Half_1_EVENRF(x);
-            Half_2_EVENRF(x);
+            FWDQR((x[0]), (x[5]), (x[10]), (x[15]), (x[3]), false);
+            FWDQR((x[1]), (x[6]), (x[11]), (x[12]), (x[0]), false);
+            FWDQR((x[2]), (x[7]), (x[8]), (x[13]), (x[1]), false);
+            FWDQR((x[3]), (x[4]), (x[9]), (x[14]), (x[2]), false);
         }
     }
 } frward;

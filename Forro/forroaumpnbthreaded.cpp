@@ -31,7 +31,8 @@ using namespace Forro;
 using namespace Parameters;
 using namespace Operation;
 
-u16 ID[][2] = {{5, 17}}, OD[][2] = {{5, 0}};
+
+u16 ID[][2] = {{5, 18}}, OD[][2] = {{3, 0}};
 
 pair<unordered_map<u16, double>, unordered_map<u16, double>> findPNB(u16 KWord, promise<pair<unordered_map<u16, double>, unordered_map<u16, double>>> &&list);
 
@@ -49,9 +50,9 @@ int main(int argc, char *argv[])
     basicdetails.programtype = "PNB Determiantion";
     basicdetails.totalround = 6;
 
-    diffdetails.fwdround = 2;
+    diffdetails.fwdround = 3;
 
-    sampledetails.samplesperLoop = pow(2, 18);
+    sampledetails.samplesperLoop = pow(2, 19);
 
     diffdetails.ID = ID;
     diffdetails.OD = OD;
@@ -59,7 +60,7 @@ int main(int argc, char *argv[])
     diffdetails.ODsize = sizeof(OD) / sizeof(OD[0]);
     diffdetails.halfroundflag = true;
 
-    PNBdetails.neutralitymeasure = 0.2;
+    PNBdetails.neutralitymeasure = pow(2, -1);
 
     PrintBasicDetails(basicdetails, cout);
     PrintDiffDetails(diffdetails, cout);
@@ -69,13 +70,13 @@ int main(int argc, char *argv[])
     char filename[90], dfilename[100];
     // if (argc > 1)
     // {
-    // ---------------------------FILE CREATION------------------------------------------------------------------------------
+        // ---------------------------FILE CREATION------------------------------------------------------------------------------
 
-    // Format the date and time in YYYYMMDD_HHMMSS format
-    strftime(filename, sizeof(filename), "%d%m%Y_%H%M%S", lt);
-    sprintf(filename + strlen(filename), "%s_aum_%.2lf_%i_od_%i_%i_id_%i_%i.txt", basicdetails.cipher.c_str(), PNBdetails.neutralitymeasure, basicdetails.totalround, OD[0][0], OD[0][1], ID[0][0], ID[0][1]);
+        // Format the date and time in YYYYMMDD_HHMMSS format
+        strftime(filename, sizeof(filename), "%M%H%S_%d%m%Y", lt);
+        sprintf(filename + strlen(filename), "_forro_auma_%.2lf_pnbs_%s_%i_id_%i_%i.txt", PNBdetails.neutralitymeasure, basicdetails.cipher.c_str(), basicdetails.totalround, ID[0][0], ID[0][1]);
 
-    sprintf(dfilename, "detailed_%s", filename); // Add your desired extra character
+        sprintf(dfilename, "detailed_%s", filename); // Add your desired extra character
     // }
     ofstream dfile(dfilename);
     if (dfile.is_open())
@@ -232,24 +233,18 @@ pair<unordered_map<u16, double>, unordered_map<u16, double>> findPNB(u16 keyWord
                 frward.RoundFunction(x0, i);
                 frward.RoundFunction(dx0, i);
             }
-            FWDQR((x0[0]), (x0[4]), (x0[8]), (x0[12]), (x0[3]), false);
-            FWDQR((dx0[0]), (dx0[4]), (dx0[8]), (dx0[12]), (dx0[3]), false);
+            // frward.Half_1_ODDRF(x0);
+            // frward.Half_1_ODDRF(dx0);
+
             // frward.ODDQ3(x0);
             // frward.ODDQ3(dx0);
 
             XORDifference(DiffState, WORD_COUNT, x0, dx0);
 
             fwdBit = DifferenceBit(DiffState, diffdetails.OD, diffdetails.ODsize);
+
             // frward.ODDQ4(x0);
             // frward.ODDQ4(dx0);
-
-            
-
-            FWDQR(x0[1], x0[5], x0[9], x0[13], x0[0], false);
-            FWDQR(dx0[1], dx0[5], dx0[9], dx0[13], dx0[0], false);
-
-            frward.Half_2_ODDRF(x0);
-            frward.Half_2_ODDRF(dx0);
 
             for (int i{diffdetails.fwdround + 1}; i <= basicdetails.totalround; ++i)
             {
@@ -279,15 +274,8 @@ pair<unordered_map<u16, double>, unordered_map<u16, double>> findPNB(u16 keyWord
                 bckward.RoundFunction(x0, i);
                 bckward.RoundFunction(dx0, i);
             }
-
-            bckward.Half_1_ODDRF(x0);
-            bckward.Half_1_ODDRF(dx0);
-
-            BWDQR(x0[1], x0[5], x0[9], x0[13], x0[0], false);
-            BWDQR(dx0[1], dx0[5], dx0[9], dx0[13], dx0[0], false);
-
-            // BWDQR((x0[0]), (x0[4]), (x0[8]), (x0[12]), (x0[3]), false);
-            // BWDQR((dx0[0]), (dx0[4]), (dx0[8]), (dx0[12]), (dx0[3]), false);
+            bckward.ODDQ1(x0);
+            bckward.ODDQ1(dx0);
 
             // ---------------------------BW ROUND ENDS----------------------------------------------------------------------
 

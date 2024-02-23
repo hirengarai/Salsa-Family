@@ -4,7 +4,7 @@
 //                                                                                            .
 //                                                                                            .
 //                                                                                    {, , , ... , n elements}}
-//                                                                                             m rows
+//                                                                                       m rows, n columns
 
 #include <iostream>
 
@@ -22,6 +22,8 @@ void func(int (*darray)[2], int rows) // No matter what circumstances, you must 
         for (int j{0}; j < 2; ++j)
             darray[i][j] = 1;
 };
+
+
 void printfunc(int (*darray)[2], int rows) // No matter what circumstances, you must have to include the column number of an 2d array
 {
     for (int i{0}; i < rows; ++i)

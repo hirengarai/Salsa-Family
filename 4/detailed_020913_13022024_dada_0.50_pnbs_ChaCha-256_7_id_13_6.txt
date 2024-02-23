@@ -1,3 +1,0 @@
-######## Execution started on: 13/2/2024 at 9:2:13 ########
-The file contains the detailed PNBs from the file 020913_13022024_dada_0.50_pnbs_ChaCha-256_7_id_13_6.txt
-

@@ -1,10 +1,10 @@
 /*
  * REFERENCE IMPLEMENTATION OF PNB searching programe.
  *
- * Filename: forroaumpnbthreaded.cpp
+ * Filename: aumpnb.cpp
  *
- * created: 19/2/24
- * updated: 20/2/24
+ * created: 30/12/23
+ * updated: 11/02/24
  *
  * by Hiren
  * Research Scholar
@@ -12,10 +12,10 @@
  *
  * Synopsis:
  * This file contains the PNB searching programe for the stream cipher Salsa/ ChaCha.
- * running command: g++ forroaumpnbthreaded.cpp && ./a.out
+ * running command: g++ aumpnb.cpp && ./a.out
  */
 
-#include "forro.h"       // forro round functions
+#include "chacha.h"      // chacha round functions
 #include <cmath>         // pow function
 #include <cstring>       // string
 #include <ctime>         // time
@@ -27,11 +27,19 @@
 #include <vector>        // multithreading
 
 using namespace std;
-using namespace Forro;
+using namespace ChaCha;
 using namespace Parameters;
 using namespace Operation;
 
-u16 ID[][2] = {{5, 17}}, OD[][2] = {{5, 0}};
+// u16 IDword[] = {13}, IDbit[] = {13}, ODword[] = {11}, ODbit[] = {0}, fwdround{3}, totalround{6}; // Aumasson et al.
+// int ODword[] = { 2,6,6,10,14 }, ODbit[] = { 0,7,19,12,0};
+// int ODword[] = {2, 7, 8}, ODbit[] = {0, 7, 0};
+
+// eurocrypt ID-OD
+// u16 ID[][2] = {{13, 6}}, OD[][2] = {{2, 0}, {7, 7}, {8, 0}};
+
+// aumasson ID-OD
+u16 ID[][2] = {{13, 13}}, OD[][2] = {{11, 0}};
 
 pair<unordered_map<u16, double>, unordered_map<u16, double>> findPNB(u16 KWord, promise<pair<unordered_map<u16, double>, unordered_map<u16, double>>> &&list);
 
@@ -45,38 +53,35 @@ int main(int argc, char *argv[])
          << lt->tm_hour << ':' << lt->tm_min << ':' << lt->tm_sec
          << " ########\n";
 
-    basicdetails.cipher = "Forro";
-    basicdetails.programtype = "PNB Determiantion";
-    basicdetails.totalround = 6;
+    basicdetails.cipher = "ChaCha-256";
+    basicdetails.programtype = "Backward Bias Determiantion";
+    basicdetails.totalround = 7;
 
-    diffdetails.fwdround = 2;
+    diffdetails.fwdround = 3;
 
-    sampledetails.samplesperLoop = pow(2, 18);
+    sampledetails.samplesperLoop = pow(2, 20);
 
     diffdetails.ID = ID;
     diffdetails.OD = OD;
     diffdetails.IDsize = sizeof(ID) / sizeof(ID[0]);
     diffdetails.ODsize = sizeof(OD) / sizeof(OD[0]);
-    diffdetails.halfroundflag = true;
 
-    PNBdetails.neutralitymeasure = 0.2;
+    PNBdetails.neutralitymeasure = pow(2, -1);
 
     PrintBasicDetails(basicdetails, cout);
     PrintDiffDetails(diffdetails, cout);
     PrintPNBDetails(PNBdetails, cout);
     PrintSampleDetails(sampledetails, cout);
 
-    char filename[90], dfilename[100];
-    // if (argc > 1)
-    // {
     // ---------------------------FILE CREATION------------------------------------------------------------------------------
+    char filename[90], dfilename[100];
 
     // Format the date and time in YYYYMMDD_HHMMSS format
-    strftime(filename, sizeof(filename), "%d%m%Y_%H%M%S", lt);
-    sprintf(filename + strlen(filename), "%s_aum_%.2lf_%i_od_%i_%i_id_%i_%i.txt", basicdetails.cipher.c_str(), PNBdetails.neutralitymeasure, basicdetails.totalround, OD[0][0], OD[0][1], ID[0][0], ID[0][1]);
+    strftime(filename, sizeof(filename), "%M%H%S_%d%m%Y", lt);
+    sprintf(filename + strlen(filename), "_auma_%.2lf_pnbs_%s_%i_id_%i_%i.txt", PNBdetails.neutralitymeasure, basicdetails.cipher.c_str(), basicdetails.totalround, ID[0][0], ID[0][1]);
 
     sprintf(dfilename, "detailed_%s", filename); // Add your desired extra character
-    // }
+
     ofstream dfile(dfilename);
     if (dfile.is_open())
     {
@@ -122,33 +127,27 @@ int main(int argc, char *argv[])
     for (int i{0}; i < max_num_threads; ++i)
     {
         perThreadList.at(i) = futuResults[i].get();
-        if (dfile.is_open())
+        dfile << "****************************** Keyword: " << i << " *********************************************\n";
+        dfile << "*************** PNBs (" << perThreadList.at(i).first.size() << ") ***************\n";
+        for (auto &l : perThreadList.at(i).first)
         {
-            dfile << "****************************** Keyword: " << i << " *********************************************\n";
-            dfile << "*************** PNBs (" << perThreadList.at(i).first.size() << ") ***************\n";
-            for (auto &l : perThreadList.at(i).first)
-            {
-                pnbList.push_back(l.first);
-                biasList.push_back(l.second);
-                dfile << "bias of " << (l.first) << " ~ " << setw(4) << fixed << (l.second) << "\n";
-            }
-            dfile << "*************** Non-PNBs (" << perThreadList.at(i).second.size() << ") ***************\n";
-            for (auto &l : perThreadList.at(i).second)
-            {
-                nonPNBlist.push_back(l.first);
-                nonPNBbiaslist.push_back(l.second);
-                dfile << "bias of " << (l.first) << " ~ " << setw(4) << fixed << (l.second) << "\n";
-            }
-            dfile << "*------------------------------------------------------------------------------------*\n";
+            pnbList.push_back(l.first);
+            biasList.push_back(l.second);
+            dfile << "bias of " << (l.first) << " ~ " << setw(4) << fixed << (l.second) << "\n";
         }
+        dfile << "*************** Non-PNBs (" << perThreadList.at(i).second.size() << ") ***************\n";
+        for (auto &l : perThreadList.at(i).second)
+        {
+            nonPNBlist.push_back(l.first);
+            nonPNBbiaslist.push_back(l.second);
+            dfile << "bias of " << (l.first) << " ~ " << setw(4) << fixed << (l.second) << "\n";
+        }
+        dfile << "*------------------------------------------------------------------------------------*\n";
     }
-    if (dfile.is_open())
-    {
-        dfile << "Total non-PNBs: " << nonPNBlist.size() << "\n";
-        dfile << "Total PNBs: " << pnbList.size() << "\n\n";
+    dfile << "Total non-PNBs: " << nonPNBlist.size() << "\n";
+    dfile << "Total PNBs: " << pnbList.size() << "\n\n";
 
-        dfile << "The " << pnbList.size() << " PNBs are as follows:\n";
-    }
+    dfile << "The " << pnbList.size() << " PNBs are as follows:\n";
     ofstream file(filename);
     sort(pnbList.begin(), pnbList.end());
 
@@ -232,24 +231,10 @@ pair<unordered_map<u16, double>, unordered_map<u16, double>> findPNB(u16 keyWord
                 frward.RoundFunction(x0, i);
                 frward.RoundFunction(dx0, i);
             }
-            FWDQR((x0[0]), (x0[4]), (x0[8]), (x0[12]), (x0[3]), false);
-            FWDQR((dx0[0]), (dx0[4]), (dx0[8]), (dx0[12]), (dx0[3]), false);
-            // frward.ODDQ3(x0);
-            // frward.ODDQ3(dx0);
 
             XORDifference(DiffState, WORD_COUNT, x0, dx0);
 
             fwdBit = DifferenceBit(DiffState, diffdetails.OD, diffdetails.ODsize);
-            // frward.ODDQ4(x0);
-            // frward.ODDQ4(dx0);
-
-            
-
-            FWDQR(x0[1], x0[5], x0[9], x0[13], x0[0], false);
-            FWDQR(dx0[1], dx0[5], dx0[9], dx0[13], dx0[0], false);
-
-            frward.Half_2_ODDRF(x0);
-            frward.Half_2_ODDRF(dx0);
 
             for (int i{diffdetails.fwdround + 1}; i <= basicdetails.totalround; ++i)
             {
@@ -279,19 +264,9 @@ pair<unordered_map<u16, double>, unordered_map<u16, double>> findPNB(u16 keyWord
                 bckward.RoundFunction(x0, i);
                 bckward.RoundFunction(dx0, i);
             }
-
-            bckward.Half_1_ODDRF(x0);
-            bckward.Half_1_ODDRF(dx0);
-
-            BWDQR(x0[1], x0[5], x0[9], x0[13], x0[0], false);
-            BWDQR(dx0[1], dx0[5], dx0[9], dx0[13], dx0[0], false);
-
-            // BWDQR((x0[0]), (x0[4]), (x0[8]), (x0[12]), (x0[3]), false);
-            // BWDQR((dx0[0]), (dx0[4]), (dx0[8]), (dx0[12]), (dx0[3]), false);
-
             // ---------------------------BW ROUND ENDS----------------------------------------------------------------------
 
-            XORDifference(DiffState, WORD_COUNT, x0, dx0);
+            XORDifference(DiffState, 16, x0, dx0);
 
             bwdBit = DifferenceBit(DiffState, diffdetails.OD, diffdetails.ODsize);
 
